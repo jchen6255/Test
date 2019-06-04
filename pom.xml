@@ -102,6 +102,7 @@
 			</plugin>
 			
 		</plugins>
+		<finalName>test</finalName>
 	</build>
 	<!-- git, compile, test cases, image, push it to docker hub -->
 
