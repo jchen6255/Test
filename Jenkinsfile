@@ -1,29 +1,42 @@
-node {
-    def app
+pipeline {
 
-    stage('Clone repository') {
+	agent any
+	stages {
+	
+		stage('Checkout') {
+			steps {
+				git 'ssh git@github.com:jchen6255/dave.git'
+			}
+		}
+	
+		stage('First') {
+		
+			steps {
+				sh 'mvn clean compile'
+			}
+		}
+		
+		stage('Test') {
+			steps {
+				sh 'mvn test'
+			}
+		}
+		
+		stage('Package'){
+			steps {
+				sh 'mvn package'
+			}
+		}
+		
+		stage('Docker') {
+			steps {
+				sh 'sudo docker build -t dave .'
+				sh 'sudo docker tag dave:latest 740287161772.dkr.ecr.us-east-2.amazonaws.com/dave:latest'
+				sh 'sudo docker push 740287161772.dkr.ecr.us-east-2.amazonaws.com/dave:latest'
+			}
+		}
+	
+	}
+	
 
-        checkout scm
-    }
-
-    stage('Build image') {
-
-        app = docker.build("jchen6255/dockertest")
-    }
-
-    stage('Test image') {
-        
-        app.inside {
-            echo "Tests passed"
-        }
-    }
-
-    stage('Push image') {
-     
-        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
-            } 
-                echo "Trying to Push Docker Build to DockerHub"
-    }
 }
